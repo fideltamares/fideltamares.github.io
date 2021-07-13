@@ -1,0 +1,25 @@
+name: "Stats No One Asked For"
+navbar:
+  title: "Navigation"                          
+  type: inverse
+  left:
+    - text: "Home"
+      icon: fa-home
+      href: index.html
+    - text: "About"
+      icon: fa-user 
+      href: about.html
+    - text: "BeerEDA"
+      icon: fa-file-pdf-o
+      href: fidel-Tamares-Case-1-RMD.html
+    - text: "Fifa Height Analysis"
+      icon: fa-rss
+      href: FifaHeightByName.JPG
+    - text: "r/dataisbeautiful"
+      icon: fa-rss
+      href: https://www.reddit.com/r/dataisbeautiful/   
+
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate
