@@ -17,7 +17,7 @@ navbar:
       href: FifaHeightByName.JPG
     - text: "r/dataisbeautiful"
       icon: fa-rss
-      href: https://www.reddit.com/dataisbeautiful    
+      href: https://www.reddit.com/r/dataisbeautiful/   
 
 output:
   html_document:
