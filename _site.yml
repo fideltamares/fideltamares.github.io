@@ -11,10 +11,10 @@ navbar:
       href: about.html
     - text: "BeerEDA"
       icon: fa-file-pdf-o
-      href: fidel Tamaresd Case 1 RMD.html
+      href: fidel Tamares Case 1 RMD.html
     - text: "Fifa Height Analysis"
       icon: fa-rss
-      href: https://YOURGITHUB.github.io/blog/  # CHANGE HERE OR DELETE ALL 3 LINES 
+      href: FifaHeightByName.JPG
     - text: "r/dataisbeautiful"
       icon: fa-rss
       href: https://www.reddit.com/dataisbeautiful    
