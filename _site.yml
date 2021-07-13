@@ -1,0 +1,14 @@
+name: "Stats No One Asked For"
+navbar:
+  title: "Navigation"
+  left:
+   - text: "Home"
+   href: index.html
+   - text: "About"
+   href: about.html
+   - text: "Beer Analysis"
+   href: about.html
+   - text: "Fifa Height Analysis"
+   href: about.html
+   - text: "r/Dataisbeautiful"
+   href: https://www.reddit.com/r/dataisbeautiful/
