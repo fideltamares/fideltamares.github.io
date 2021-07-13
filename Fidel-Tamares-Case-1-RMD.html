@@ -259,21 +259,21 @@ $(document).ready(function () {
   </a>
 </li>
 <li>
-  <a href="fidel Tamaresd Case 1 RMD.html">
+  <a href="fidel-Tamares-CasE-1-RMD.html">
     <span class="fa fa-file-pdf-o"></span>
      
     BeerEDA
   </a>
 </li>
 <li>
-  <a href="https://YOURGITHUB.github.io/blog/">
+  <a href="FifaHeightByName.JPG">
     <span class="fa fa-rss"></span>
      
     Fifa Height Analysis
   </a>
 </li>
 <li>
-  <a href="https://www.reddit.com/dataisbeautiful">
+  <a href="https://www.reddit.com/r/dataisbeautiful/">
     <span class="fa fa-rss"></span>
      
     r/dataisbeautiful
@@ -322,10 +322,12 @@ USPop2019OnlyStates3yrGrowth$X2019pop &lt;- as.numeric((gsub(&quot;,&quot;,&quot
 <pre class="r"><code>#verify that chart matches the data
 table(breweries$State)</code></pre>
 <pre><code>## 
-##  AK  AL  AR  AZ  CA  CO  CT  DC  DE  FL  GA  HI  IA  ID  IL  IN  KS  KY  LA  MA  MD  ME  MI  MN  MO  MS 
-##   7   3   2  11  39  47   8   1   2  15   7   4   5   5  18  22   3   4   5  23   7   9  32  12   9   2 
-##  MT  NC  ND  NE  NH  NJ  NM  NV  NY  OH  OK  OR  PA  RI  SC  SD  TN  TX  UT  VA  VT  WA  WI  WV  WY 
-##   9  19   1   5   3   3   4   2  16  15   6  29  25   5   4   1   3  28   4  16  10  23  20   1   4</code></pre>
+##  AK  AL  AR  AZ  CA  CO  CT  DC  DE  FL  GA  HI  IA  ID  IL  IN  KS  KY  LA  MA 
+##   7   3   2  11  39  47   8   1   2  15   7   4   5   5  18  22   3   4   5  23 
+##  MD  ME  MI  MN  MO  MS  MT  NC  ND  NE  NH  NJ  NM  NV  NY  OH  OK  OR  PA  RI 
+##   7   9  32  12   9   2   9  19   1   5   3   3   4   2  16  15   6  29  25   5 
+##  SC  SD  TN  TX  UT  VA  VT  WA  WI  WV  WY 
+##   4   1   3  28   4  16  10  23  20   1   4</code></pre>
 <pre class="r"><code>#tallying up breweries and finding the average of each state
 statecount&lt;- breweries %&gt;% group_by(State) %&gt;% tally
 statecount$State &lt;- trimws(statecount$State, which = c(&quot;left&quot;))
@@ -355,36 +357,50 @@ completebrewerylist1 = merge(completebrewerylist, stateinfo, by= &quot;State&quo
 <p>#Code Chunk 4: Before answering the last portion of question 2, We use the head() and tail() functions to call the first and last 6 entries of the dataframe. This satisfies the last portion of question #2. At this step we also merge the data from the USPop2019OnlyStates3yrGrowth.CSV with the new dataframe (completebrewerylist1) by the “state” column to create a new dataframe; completebrewerylist2.</p>
 <pre class="r"><code>headlist &lt;- completebrewerylist1 %&gt;% head()
 headlist</code></pre>
-<pre><code>##   State Brewery_id                     Name.x Beer_ID   ABV IBU                   Style Ounces
-## 1    AK        494             Polar Pale Ale     920 0.052  17 American Pale Ale (APA)     12
-## 2    AK        103            King Street IPA    1667 0.060  70            American IPA     12
-## 3    AK        454          Single Engine Red     929 0.058  46           Irish Red Ale     12
-## 4    AK        459 Skilak Scottish Ale (2011)     348 0.058  NA            Scottish Ale     12
-## 5    AK        103        King Street Pilsner    1706 0.055  NA          Czech Pilsener     12
-## 6    AK        224          Pleasure Town IPA    1814 0.063  61            American IPA     12
-##                         Name.y      City State_Name Region Division
-## 1 Broken Tooth Brewing Company Anchorage     alaska   West  Pacific
-## 2  King Street Brewing Company Anchorage     alaska   West  Pacific
-## 3       Denali Brewing Company Talkeetna     alaska   West  Pacific
-## 4  Kenai River Brewing Company  Soldotna     alaska   West  Pacific
-## 5  King Street Brewing Company Anchorage     alaska   West  Pacific
-## 6 Midnight Sun Brewing Company Anchorage     alaska   West  Pacific</code></pre>
+<pre><code>##   State Brewery_id                     Name.x Beer_ID   ABV IBU
+## 1    AK        494             Polar Pale Ale     920 0.052  17
+## 2    AK        103            King Street IPA    1667 0.060  70
+## 3    AK        454          Single Engine Red     929 0.058  46
+## 4    AK        459 Skilak Scottish Ale (2011)     348 0.058  NA
+## 5    AK        103        King Street Pilsner    1706 0.055  NA
+## 6    AK        224          Pleasure Town IPA    1814 0.063  61
+##                     Style Ounces                       Name.y      City State_Name
+## 1 American Pale Ale (APA)     12 Broken Tooth Brewing Company Anchorage     alaska
+## 2            American IPA     12  King Street Brewing Company Anchorage     alaska
+## 3           Irish Red Ale     12       Denali Brewing Company Talkeetna     alaska
+## 4            Scottish Ale     12  Kenai River Brewing Company  Soldotna     alaska
+## 5          Czech Pilsener     12  King Street Brewing Company Anchorage     alaska
+## 6            American IPA     12 Midnight Sun Brewing Company Anchorage     alaska
+##   Region Division
+## 1   West  Pacific
+## 2   West  Pacific
+## 3   West  Pacific
+## 4   West  Pacific
+## 5   West  Pacific
+## 6   West  Pacific</code></pre>
 <pre class="r"><code>taillist &lt;- completebrewerylist1 %&gt;% tail()
 taillist</code></pre>
-<pre><code>##      State Brewery_id                           Name.x Beer_ID   ABV IBU                    Style Ounces
-## 2405    WY        458            Indian Paintbrush IPA    1199 0.070  75             American IPA     12
-## 2406    WY        192                   Pakoâ\200\231s EyePA     393 0.068  60             American IPA     12
-## 2407    WY         80        Bomber Mountain Amber Ale    2484 0.046  20 American Amber / Red Ale     12
-## 2408    WY        458             Wagon Box Wheat Beer    1197 0.059  15  American Pale Wheat Ale     12
-## 2409    WY        458 Bomber Mountain Amber Ale (2013)    1200 0.046  20 American Amber / Red Ale     12
-## 2410    WY        192                  Monarch Pilsner    2234 0.050  NA         American Pilsner     12
-##                               Name.y     City State_Name Region Division
-## 2405 The Black Tooth Brewing Company Sheridan    wyoming   West Mountain
-## 2406     Snake River Brewing Company  Jackson    wyoming   West Mountain
-## 2407     Black Tooth Brewing Company Sheridan    wyoming   West Mountain
-## 2408 The Black Tooth Brewing Company Sheridan    wyoming   West Mountain
-## 2409 The Black Tooth Brewing Company Sheridan    wyoming   West Mountain
-## 2410     Snake River Brewing Company  Jackson    wyoming   West Mountain</code></pre>
+<pre><code>##      State Brewery_id                           Name.x Beer_ID   ABV IBU
+## 2405    WY        458            Indian Paintbrush IPA    1199 0.070  75
+## 2406    WY        192                   Pakoâ\200\231s EyePA     393 0.068  60
+## 2407    WY         80        Bomber Mountain Amber Ale    2484 0.046  20
+## 2408    WY        458             Wagon Box Wheat Beer    1197 0.059  15
+## 2409    WY        458 Bomber Mountain Amber Ale (2013)    1200 0.046  20
+## 2410    WY        192                  Monarch Pilsner    2234 0.050  NA
+##                         Style Ounces                          Name.y     City
+## 2405             American IPA     12 The Black Tooth Brewing Company Sheridan
+## 2406             American IPA     12     Snake River Brewing Company  Jackson
+## 2407 American Amber / Red Ale     12     Black Tooth Brewing Company Sheridan
+## 2408  American Pale Wheat Ale     12 The Black Tooth Brewing Company Sheridan
+## 2409 American Amber / Red Ale     12 The Black Tooth Brewing Company Sheridan
+## 2410         American Pilsner     12     Snake River Brewing Company  Jackson
+##      State_Name Region Division
+## 2405    wyoming   West Mountain
+## 2406    wyoming   West Mountain
+## 2407    wyoming   West Mountain
+## 2408    wyoming   West Mountain
+## 2409    wyoming   West Mountain
+## 2410    wyoming   West Mountain</code></pre>
 <pre class="r"><code>#adding state population and 3 yr growth
 
 completebrewerylist2 = merge(completebrewerylist1, USPop2019OnlyStates3yrGrowth, by=&quot;State&quot;, all=TRUE)</code></pre>
@@ -393,10 +409,12 @@ completebrewerylist2 = merge(completebrewerylist1, USPop2019OnlyStates3yrGrowth,
 
 #Checking for missing values
 colSums(is.na(completebrewerylist2))</code></pre>
-<pre><code>##      State Brewery_id     Name.x    Beer_ID        ABV        IBU      Style     Ounces     Name.y 
-##          0          0          0          0         62       1005          0          0          0 
-##       City State_Name     Region   Division   X2019pop X3YrGrowth 
-##          0          8          8          8          0          0</code></pre>
+<pre><code>##      State Brewery_id     Name.x    Beer_ID        ABV        IBU      Style 
+##          0          0          0          0         62       1005          0 
+##     Ounces     Name.y       City State_Name     Region   Division   X2019pop 
+##          0          0          0          8          8          8          0 
+## X3YrGrowth 
+##          0</code></pre>
 <pre class="r"><code># option 1 omitting NA
 #na.omit() used
 
@@ -435,19 +453,21 @@ summary(completebrewerylist2$IBU) #Overall IBU Median is 35</code></pre>
 # Which state has the most bitter (IBU) beer?
 
 completebrewerylist2[which.max(completebrewerylist2$ABV),]</code></pre>
-<pre><code>##     State Brewery_id                                               Name.x Beer_ID   ABV IBU
-## 531    CO         52 Lee Hill Series Vol. 5 - Belgian Style Quadrupel Ale    2565 0.128  NA
-##                Style Ounces                  Name.y    City State_Name Region Division X2019pop
-## 531 Quadrupel (Quad)   19.2 Upslope Brewing Company Boulder   colorado   West Mountain  5758736
-##     X3YrGrowth
-## 531       0.03</code></pre>
+<pre><code>##     State Brewery_id                                               Name.x Beer_ID
+## 531    CO         52 Lee Hill Series Vol. 5 - Belgian Style Quadrupel Ale    2565
+##       ABV IBU            Style Ounces                  Name.y    City State_Name
+## 531 0.128  NA Quadrupel (Quad)   19.2 Upslope Brewing Company Boulder   colorado
+##     Region Division X2019pop X3YrGrowth
+## 531   West Mountain  5758736       0.03</code></pre>
 <pre class="r"><code>#CO, Upslope Brewing at 12.8%, Belgian Style Quad
 
 completebrewerylist2[which.max(completebrewerylist2$IBU),]</code></pre>
-<pre><code>##      State Brewery_id                    Name.x Beer_ID   ABV IBU                          Style Ounces
-## 1821    OR        375 Bitter Bitch Imperial IPA     980 0.082 138 American Double / Imperial IPA     12
-##                       Name.y    City State_Name Region Division X2019pop X3YrGrowth
-## 1821 Astoria Brewing Company Astoria     oregon   West  Pacific  4217737       0.02</code></pre>
+<pre><code>##      State Brewery_id                    Name.x Beer_ID   ABV IBU
+## 1821    OR        375 Bitter Bitch Imperial IPA     980 0.082 138
+##                               Style Ounces                  Name.y    City
+## 1821 American Double / Imperial IPA     12 Astoria Brewing Company Astoria
+##      State_Name Region Division X2019pop X3YrGrowth
+## 1821     oregon   West  Pacific  4217737       0.02</code></pre>
 <pre class="r"><code>#OR, Astoria Brewing at 138 IBU, American Double/ Imperial IPA</code></pre>
 <p>#Code Chunk 8: To answer question #6 we run a summary of the completebrewerylist1$ABV to get statistical summary. We then plot the dataframe based on ABV on a histogram to visualize the distribution of the beers by ABV levels. We overlay a density line to help better see how beers are distrubuted based on ABV.</p>
 <pre class="r"><code>#6 Comment on the summary statistics and distribution of the ABV variable
@@ -533,35 +553,35 @@ beerclass1 = knn(beertrain1[c(1,2)], beertest1[c(1,2)], beertrain1$ipaale, prob 
 table(beerclass1, beertest1$ipaale) </code></pre>
 <pre><code>##           
 ## beerclass1 Ale IPA
-##        Ale 143  14
-##        IPA  20 108</code></pre>
+##        Ale 138  20
+##        IPA  23 104</code></pre>
 <pre class="r"><code>confusionMatrix(table(beerclass1, beertest1$ipaale))</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           
 ## beerclass1 Ale IPA
-##        Ale 143  14
-##        IPA  20 108
-##                                          
-##                Accuracy : 0.8807         
-##                  95% CI : (0.8373, 0.916)
-##     No Information Rate : 0.5719         
-##     P-Value [Acc &gt; NIR] : &lt;2e-16         
-##                                          
-##                   Kappa : 0.7579         
-##                                          
-##  Mcnemar&#39;s Test P-Value : 0.3912         
-##                                          
-##             Sensitivity : 0.8773         
-##             Specificity : 0.8852         
-##          Pos Pred Value : 0.9108         
-##          Neg Pred Value : 0.8438         
-##              Prevalence : 0.5719         
-##          Detection Rate : 0.5018         
-##    Detection Prevalence : 0.5509         
-##       Balanced Accuracy : 0.8813         
-##                                          
-##        &#39;Positive&#39; Class : Ale            
+##        Ale 138  20
+##        IPA  23 104
+##                                           
+##                Accuracy : 0.8491          
+##                  95% CI : (0.8022, 0.8886)
+##     No Information Rate : 0.5649          
+##     P-Value [Acc &gt; NIR] : &lt;2e-16          
+##                                           
+##                   Kappa : 0.6939          
+##                                           
+##  Mcnemar&#39;s Test P-Value : 0.7604          
+##                                           
+##             Sensitivity : 0.8571          
+##             Specificity : 0.8387          
+##          Pos Pred Value : 0.8734          
+##          Neg Pred Value : 0.8189          
+##              Prevalence : 0.5649          
+##          Detection Rate : 0.4842          
+##    Detection Prevalence : 0.5544          
+##       Balanced Accuracy : 0.8479          
+##                                           
+##        &#39;Positive&#39; Class : Ale             
 ## </code></pre>
 <pre class="r"><code>#82.8 % Accuracy to classify beers by IBU and ABV</code></pre>
 <p>#Additional EDA #Code Chunk 11: We created a line of code that could be modified to find the top 6 of specific chracteristics. We used the aggregate function to show the relationship between 2 columns, such as states and counting the number of beers from them or breweries with the most beer styles for sale. We ussed the head function set to go in decreasing order to help make lists of top competitors and highly competitive states and cities.</p>
@@ -694,57 +714,108 @@ names(USPop2019OnlyStates3yrGrowth3)[2] = &quot;pop2019&quot;
 names(USPop2019OnlyStates3yrGrowth3)[3] = &quot;g2019&quot;
 
 USPop2019OnlyStates3yrGrowth3 %&gt;% slice(-8)</code></pre>
-<pre><code>##    sabb  pop2019 g2019  n     State_Name        Region           Division X2019pop.y X3YrGrowth.y BP100K
-## 1    AK   731545 -0.01  7         alaska          West            Pacific     731545        -0.01    1.0
-## 2    AL  4903185  0.01  3        alabama         South East South Central    4903185         0.01    0.1
-## 3    AR  3017804  0.01  2       arkansas         South West South Central    3017804         0.01    0.1
-## 4    AZ  7278717  0.03 11        arizona          West           Mountain    7278717         0.03    0.2
-## 5    CA 39512223  0.00 39     california          West            Pacific   39512223         0.00    0.1
-## 6    CO  5758736  0.03 47       colorado          West           Mountain    5758736         0.03    0.8
-## 7    CT  3565287  0.00  8    connecticut     Northeast        New England    3565287         0.00    0.2
-## 8    DE   973764  0.02  2       delaware         South     South Atlantic     973764         0.02    0.2
-## 9    FL 21477737  0.02 15        florida         South     South Atlantic   21477737         0.02    0.1
-## 10   GA 10617423  0.02  7        georgia         South     South Atlantic   10617423         0.02    0.1
-## 11   HI  1415872 -0.01  4         hawaii          West            Pacific    1415872        -0.01    0.3
-## 12   IA  3155070  0.00  5           iowa North Central West North Central    3155070         0.00    0.2
-## 13   ID  1787065  0.04  5          idaho          West           Mountain    1787065         0.04    0.3
-## 14   IL 12671821 -0.01 18       illinois North Central East North Central   12671821        -0.01    0.1
-## 15   IN  6732219  0.01 22        indiana North Central East North Central    6732219         0.01    0.3
-## 16   KS  2913314  0.00  3         kansas North Central West North Central    2913314         0.00    0.1
-## 17   KY  4467673  0.00  4       kentucky         South East South Central    4467673         0.00    0.1
-## 18   LA  4648794  0.00  5      louisiana         South West South Central    4648794         0.00    0.1
-## 19   MA  6892503  0.00 23  massachusetts     Northeast        New England    6892503         0.00    0.3
-## 20   MD  6045680  0.00  7       maryland         South     South Atlantic    6045680         0.00    0.1
-## 21   ME  1344212  0.01  9          maine     Northeast        New England    1344212         0.01    0.7
-## 22   MI  9986857  0.00 32       michigan North Central East North Central    9986857         0.00    0.3
-## 23   MN  5639632  0.01 12      minnesota North Central West North Central    5639632         0.01    0.2
-## 24   MO  6137428  0.01  9       missouri North Central West North Central    6137428         0.01    0.1
-## 25   MS  2976149  0.00  2    mississippi         South East South Central    2976149         0.00    0.1
-## 26   MT  1068778  0.02  9        montana          West           Mountain    1068778         0.02    0.8
-## 27   NC 10488084  0.02 19 north carolina         South     South Atlantic   10488084         0.02    0.2
-## 28   ND   762062  0.01  1   north dakota North Central West North Central     762062         0.01    0.1
-## 29   NE  1934408  0.01  5       nebraska North Central West North Central    1934408         0.01    0.3
-## 30   NH  1359711  0.01  3  new hampshire     Northeast        New England    1359711         0.01    0.2
-## 31   NJ  8882190  0.00  3     new jersey     Northeast    Middle Atlantic    8882190         0.00    0.0
-## 32   NM  2096829  0.00  4     new mexico          West           Mountain    2096829         0.00    0.2
-## 33   NV  3080156  0.04  2         nevada          West           Mountain    3080156         0.04    0.1
-## 34   NY 19453561 -0.01 16       new york     Northeast    Middle Atlantic   19453561        -0.01    0.1
-## 35   OH 11689100  0.00 15           ohio North Central East North Central   11689100         0.00    0.1
-## 36   OK  3956971  0.01  6       oklahoma         South West South Central    3956971         0.01    0.2
-## 37   OR  4217737  0.02 29         oregon          West            Pacific    4217737         0.02    0.7
-## 38   PA 12801989  0.00 25   pennsylvania     Northeast    Middle Atlantic   12801989         0.00    0.2
-## 39   RI  1059361  0.00  5   rhode island     Northeast        New England    1059361         0.00    0.5
-## 40   SC  5148714  0.03  4 south carolina         South     South Atlantic    5148714         0.03    0.1
-## 41   SD   884659  0.01  1   south dakota North Central West North Central     884659         0.01    0.1
-## 42   TN  6829174  0.02  3      tennessee         South East South Central    6829174         0.02    0.0
-## 43   TX 28995881  0.02 28          texas         South West South Central   28995881         0.02    0.1
-## 44   UT  3205958  0.03  4           utah          West           Mountain    3205958         0.03    0.1
-## 45   VA  8535519  0.01 16       virginia         South     South Atlantic    8535519         0.01    0.2
-## 46   VT   623989  0.00 10        vermont     Northeast        New England     623989         0.00    1.6
-## 47   WA  7614893  0.03 23     washington          West            Pacific    7614893         0.03    0.3
-## 48   WI  5822434  0.01 20      wisconsin North Central East North Central    5822434         0.01    0.3
-## 49   WV  1792147 -0.01  1  west virginia         South     South Atlantic    1792147        -0.01    0.1
-## 50   WY   578759  0.00  4        wyoming          West           Mountain     578759         0.00    0.7</code></pre>
+<pre><code>##    sabb  pop2019 g2019  n     State_Name        Region           Division
+## 1    AK   731545 -0.01  7         alaska          West            Pacific
+## 2    AL  4903185  0.01  3        alabama         South East South Central
+## 3    AR  3017804  0.01  2       arkansas         South West South Central
+## 4    AZ  7278717  0.03 11        arizona          West           Mountain
+## 5    CA 39512223  0.00 39     california          West            Pacific
+## 6    CO  5758736  0.03 47       colorado          West           Mountain
+## 7    CT  3565287  0.00  8    connecticut     Northeast        New England
+## 8    DE   973764  0.02  2       delaware         South     South Atlantic
+## 9    FL 21477737  0.02 15        florida         South     South Atlantic
+## 10   GA 10617423  0.02  7        georgia         South     South Atlantic
+## 11   HI  1415872 -0.01  4         hawaii          West            Pacific
+## 12   IA  3155070  0.00  5           iowa North Central West North Central
+## 13   ID  1787065  0.04  5          idaho          West           Mountain
+## 14   IL 12671821 -0.01 18       illinois North Central East North Central
+## 15   IN  6732219  0.01 22        indiana North Central East North Central
+## 16   KS  2913314  0.00  3         kansas North Central West North Central
+## 17   KY  4467673  0.00  4       kentucky         South East South Central
+## 18   LA  4648794  0.00  5      louisiana         South West South Central
+## 19   MA  6892503  0.00 23  massachusetts     Northeast        New England
+## 20   MD  6045680  0.00  7       maryland         South     South Atlantic
+## 21   ME  1344212  0.01  9          maine     Northeast        New England
+## 22   MI  9986857  0.00 32       michigan North Central East North Central
+## 23   MN  5639632  0.01 12      minnesota North Central West North Central
+## 24   MO  6137428  0.01  9       missouri North Central West North Central
+## 25   MS  2976149  0.00  2    mississippi         South East South Central
+## 26   MT  1068778  0.02  9        montana          West           Mountain
+## 27   NC 10488084  0.02 19 north carolina         South     South Atlantic
+## 28   ND   762062  0.01  1   north dakota North Central West North Central
+## 29   NE  1934408  0.01  5       nebraska North Central West North Central
+## 30   NH  1359711  0.01  3  new hampshire     Northeast        New England
+## 31   NJ  8882190  0.00  3     new jersey     Northeast    Middle Atlantic
+## 32   NM  2096829  0.00  4     new mexico          West           Mountain
+## 33   NV  3080156  0.04  2         nevada          West           Mountain
+## 34   NY 19453561 -0.01 16       new york     Northeast    Middle Atlantic
+## 35   OH 11689100  0.00 15           ohio North Central East North Central
+## 36   OK  3956971  0.01  6       oklahoma         South West South Central
+## 37   OR  4217737  0.02 29         oregon          West            Pacific
+## 38   PA 12801989  0.00 25   pennsylvania     Northeast    Middle Atlantic
+## 39   RI  1059361  0.00  5   rhode island     Northeast        New England
+## 40   SC  5148714  0.03  4 south carolina         South     South Atlantic
+## 41   SD   884659  0.01  1   south dakota North Central West North Central
+## 42   TN  6829174  0.02  3      tennessee         South East South Central
+## 43   TX 28995881  0.02 28          texas         South West South Central
+## 44   UT  3205958  0.03  4           utah          West           Mountain
+## 45   VA  8535519  0.01 16       virginia         South     South Atlantic
+## 46   VT   623989  0.00 10        vermont     Northeast        New England
+## 47   WA  7614893  0.03 23     washington          West            Pacific
+## 48   WI  5822434  0.01 20      wisconsin North Central East North Central
+## 49   WV  1792147 -0.01  1  west virginia         South     South Atlantic
+## 50   WY   578759  0.00  4        wyoming          West           Mountain
+##    X2019pop.y X3YrGrowth.y BP100K
+## 1      731545        -0.01    1.0
+## 2     4903185         0.01    0.1
+## 3     3017804         0.01    0.1
+## 4     7278717         0.03    0.2
+## 5    39512223         0.00    0.1
+## 6     5758736         0.03    0.8
+## 7     3565287         0.00    0.2
+## 8      973764         0.02    0.2
+## 9    21477737         0.02    0.1
+## 10   10617423         0.02    0.1
+## 11    1415872        -0.01    0.3
+## 12    3155070         0.00    0.2
+## 13    1787065         0.04    0.3
+## 14   12671821        -0.01    0.1
+## 15    6732219         0.01    0.3
+## 16    2913314         0.00    0.1
+## 17    4467673         0.00    0.1
+## 18    4648794         0.00    0.1
+## 19    6892503         0.00    0.3
+## 20    6045680         0.00    0.1
+## 21    1344212         0.01    0.7
+## 22    9986857         0.00    0.3
+## 23    5639632         0.01    0.2
+## 24    6137428         0.01    0.1
+## 25    2976149         0.00    0.1
+## 26    1068778         0.02    0.8
+## 27   10488084         0.02    0.2
+## 28     762062         0.01    0.1
+## 29    1934408         0.01    0.3
+## 30    1359711         0.01    0.2
+## 31    8882190         0.00    0.0
+## 32    2096829         0.00    0.2
+## 33    3080156         0.04    0.1
+## 34   19453561        -0.01    0.1
+## 35   11689100         0.00    0.1
+## 36    3956971         0.01    0.2
+## 37    4217737         0.02    0.7
+## 38   12801989         0.00    0.2
+## 39    1059361         0.00    0.5
+## 40    5148714         0.03    0.1
+## 41     884659         0.01    0.1
+## 42    6829174         0.02    0.0
+## 43   28995881         0.02    0.1
+## 44    3205958         0.03    0.1
+## 45    8535519         0.01    0.2
+## 46     623989         0.00    1.6
+## 47    7614893         0.03    0.3
+## 48    5822434         0.01    0.3
+## 49    1792147        -0.01    0.1
+## 50     578759         0.00    0.7</code></pre>
 <pre class="r"><code>USPop2019OnlyStates3yrGrowth3$pop2019 &lt;- as.numeric((gsub(&quot;,&quot;,&quot;&quot;,USPop2019OnlyStates3yrGrowth3$pop2019)))
 
 #Plotting brewers per capita (100k)
