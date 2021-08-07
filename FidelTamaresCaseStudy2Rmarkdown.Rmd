@@ -1,0 +1,699 @@
+---
+title: "AttritionEDACaseStudy2DDS"
+author: "Fidel"
+date: "8/4/2021"
+output: html_document
+---
+Intro: Good afternoon Mr. Steven Miller and Mr. Justin Mitchel. I received your inquiry about determining the top 3 factors influencing attrition. In our EDA we were able to identify Age, Monthly Salary and OverTime our of 35 variables as the major influences on attrition. We also evaluated gender at each step to ensure gender discrimination was not occurring in the organization and we are happy to report we did not find any evidence. We assess the top 3 variables are related and would assess there are generational conflicts in the organizations. We found great discrepancies in pay between departments and ages, A right skewed histogram of ages throughout the company, the highest age occurence being left of the overall average age. The the range in ages is about 42 years which is about 4 generations. This is assessing generations as 20 years, each overlapping by 10 years. The overall satisfaction in the job, relationships and environment are consistent with each other and may indicate something greater not measured is influencing the attrition. 
+
+GitHub Repo: https://github.com/fideltamares/CaseStudy2DDS
+GitHub Website: https://fideltamares.github.io/ 
+Fidel Tamares Youtube: https://www.youtube.com/watch?v=uXAGDhGvZ7A 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Code Chuck #1: Initial setup by Loading packages, importing data, checking for missing data and veryifing the dataframe charactistics
+
+```{r}
+
+#Packages used in this EDA
+
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(GGally)
+library(corrplot)
+library(cowplot)
+library(scales)
+library(Hmisc)
+library(magrittr)
+library(class)
+library(caret)
+
+#Importing data files and establishing dataframes
+C2Data = read.csv(file.choose(),header = TRUE)
+C2DataNoAtr = read.csv(file.choose(),header = TRUE)
+C2DataNoSalary = read.csv(file.choose(),header = TRUE)
+
+#Checking dataframe breakdowns
+str(C2Data)
+
+#Checking for NA/missing Data, there is no missing data
+colSums(is.na(C2Data))
+colSums(is.na(C2DataNoAtr))
+colSums(is.na(C2DataNoSalary))
+
+#Convert char vars into factors
+C2Data[sapply(C2Data, is.character)] <- lapply(C2Data[sapply(C2Data, is.character)], as.factor)
+```
+
+Code Chunk #2: Starting general company breakdown. Looking at number of associates by gender and attrition numbers, departments (breakdown) 
+870 Observations 35 variables (1 was removed becuase it was ID)
+Attrition by Gender: 59% (516) Male and 41% (354) Female
+
+```{r}
+#Starting with overall attrition (count/ratio)
+ZAtr <- C2Data %>%
+  select(Attrition) %>%
+  ggplot(aes(x=Attrition, fill=Attrition)) +
+  geom_bar(stat="count") +
+  geom_text(aes(label = ..count..), stat = "count",position = "stack",vjust= -.5, size=3) +
+  geom_text(aes(label = scales::percent((..count..)/sum(..count..))),stat = "count",position = "stack",vjust= 2, size=3) +
+  labs(x="Gender",y="Employee Count", title="Attrition in the Company")
+
+#company breakdown by gender (count/ratio), 354 (41%) female and 516 (59%) male, 870 total
+ZCompanyGender <- C2Data %>%
+  select(Gender) %>%
+  ggplot(aes(x=Gender, fill=Gender)) +
+  geom_bar(stat="count") +
+  geom_text(aes(label = ..count..), stat = "count",position = "stack",vjust= -.5, size=3) +
+  geom_text(aes(label = scales::percent((..count..)/sum(..count..))),stat = "count",position = "stack",vjust= 2, size=3) +
+  labs(x="Gender",y="Employee Count", title="Gender Break Down of Company")
+
+# departments (3), 35 (4%) in HR, 562 (65%) in RD and 273 (31%) in Sales
+ZCompanyDeptEmployees <- C2Data %>%
+  select(Department) %>%
+  ggplot(aes(x=Department, fill=Department))+
+  geom_bar(stat="count") +
+  geom_text(aes(label = ..count..), stat = "count",position = "stack",vjust= -.5,size=3) +
+  geom_text(aes(label = scales::percent((..count..)/sum(..count..))),stat = "count",position = "stack",vjust= 1.5, size=3) +
+  labs(x="Department",y="Employee Count", title="Number of Employees in each department")
+
+#all department breakdown
+plot_grid(ZAtr, ZCompanyGender,nrow=1)
+plot_grid(ZCompanyDeptEmployees,nrow=1)
+```
+Code Chunk 3: Overall Attrition check, By Department, Job Titles and Income. Each chart has an interesting point that requires further analysis. Right skewed age with highest frequency left of the mean, HR lowest paid of all who quit and sales has the largest porportion of attrition. Withi this knowledge we can create a plan as follows:
+
+1. Age Analysis
+2. Income analysis
+3. Job Satistication
+4. Environmental Satisfaction
+
+Gender will be evaluated at each step since.
+
+```{r}
+
+#Overall Attrition, from first section
+ZAtr <- C2Data %>%
+  select(Attrition) %>%
+  ggplot(aes(x=Attrition, fill=Attrition)) +
+  geom_bar(stat="count") +
+  geom_text(aes(label = ..count..), stat = "count",position = "stack",vjust= -.5, size=3) +
+  geom_text(aes(label = scales::percent((..count..)/sum(..count..))),stat = "count",position = "stack",vjust= 2, size=3) +
+  labs(x="Gender",y="Employee Count", title="Attrition in the Company")
+
+#Attrition by Job
+ArtJobRole<- C2Data %>%
+  select(JobRole, Attrition) %>%
+  ggplot(aes(x=JobRole, fill=Attrition))+
+  geom_bar(position="dodge",stat="count") +
+  labs(x="Job Roles",y="Employee Count", title="Attrition by Job Title")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+#Attrition by age
+
+AgeFemAtr <- C2Data %>%
+  select(Gender, Age, Attrition) %>% 
+  filter(Gender == "Female", Attrition =="Yes") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='pink') +
+  geom_vline(aes(xintercept=mean(Age)), color='red') +
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Ages for Females Who Quit") +
+  annotate("text", label = "Mean = 33.83", x=50, y=.04, color = "black")
+
+AgeMalAtr <- C2Data %>%
+  select(Gender, Age, Attrition) %>% 
+  filter(Gender == "Male", Attrition =="Yes") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red') +
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Ages for Males Who Quit") +
+  annotate("text", label = "Mean = 33.76", x=50, y=.04, color = "black")
+
+
+#Attrition by income
+
+IncDeptAtr <- C2Data %>% select(Department, MonthlyIncome, Attrition) %>% group_by(Attrition, Department) %>%
+  summarise(IncDeptAtr=mean(MonthlyIncome)) %>%
+  ggplot(aes(x=reorder(Department, IncDeptAtr), y=IncDeptAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) +
+  labs(y="Average Income", x="Average Monthly Income", title="Average Income by Department and Attrition Status") 
+
+ZAtr
+ArtJobRole
+AgeFemAtr
+AgeMalAtr
+IncDeptAtr
+
+
+```
+Code Chunk 4: Age Breakdown by department and gender
+
+```{r}
+#Age Breakdown for Employees per Dept
+
+AgeDeptHRMaleATR <- C2Data %>%
+  select(Gender, Age, Department, Attrition) %>% 
+  filter(Gender == "Male", Department=="Human Resources") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Agefor Males in HR") 
+
+AgeDeptHRFemATR <- C2Data %>%
+  select(Gender, Age, Department, Attrition) %>% 
+  filter(Gender == "Female", Department=="Human Resources") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Age for Females in HR")
+
+AgeDeptRDMaleATR <- C2Data %>%
+  select(Gender, Age, Department, Attrition) %>% 
+  filter(Gender == "Male", Department=="Research & Development") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Age for Males in RD") 
+
+AgeDeptRDFemATR <- C2Data %>%
+  select(Gender, Age, Department, Attrition) %>% 
+  filter(Gender == "Female", Department=="Research & Development") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Age for Females in RD")
+
+AgeDeptSalHRMaleATR<- C2Data %>%
+  select(Gender, Age, Department, Attrition) %>% 
+  filter(Gender == "Male", Department=="Sales") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Age for Males in Sales") 
+
+AgeDeptSalRFemATR <- C2Data %>%
+  select(Gender, Age, Department, Attrition) %>% 
+  filter(Gender == "Female", Department=="Sales") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Age Breakdown for Females in Sales")
+
+plot_grid(AgeDeptHRMaleATR,AgeDeptHRFemATR, AgeDeptRDMaleATR, AgeDeptRDFemATR, AgeDeptSalHRMaleATR,AgeDeptSalRFemATR, nrow = 3)
+```
+
+Code Chunk 4a: Age Analysis age distribution between genders, this suggests age is a factor in determing if someone is at risk of attrtion. This may be part of generational mindsets as these ages span almost 3 different generations. We followed this up with totalworking years. We chose total working years as it captures timeoutside the company too and is more related to generational workforces than time in the company.
+```{r}
+
+# Male age distribution
+AgeMaleDist <- C2Data %>%
+  select(Gender, Age) %>%
+  filter(Gender == "Male") %>%
+  ggplot(aes(x=Age)) +
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red') +
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Age Breakdown for Males") + 
+  annotate("text", label = "Mean = 36.5" , x=50, y=.04, color = "black")
+
+# Female age distribution            
+AgeFemaleDist <- C2Data %>%
+  select(Gender, Age) %>% 
+  filter(Gender == "Female") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Pink') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Age Breakdown for Females") + 
+  annotate("text", label = "Mean = 37.3", x=50, y=.04, color = "black")
+
+
+
+# Female age distribution            
+AgeFemaleTWY <- C2Data %>%
+  select(Gender, TotalWorkingYears, Age) %>% 
+  filter(Gender == "Female") %>%
+  ggplot(aes(x=TotalWorkingYears)) + 
+  geom_density(alpha = .5, fill='Pink') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Years",y="Density", title="Total Years Works for Females") + 
+  annotate("text", label = "Mean = 37.3", x=25, y=.04, color = "black")
+
+# Male age distribution            
+AgeMaleTWY <- C2Data %>%
+  select(Gender, TotalWorkingYears, Age) %>% 
+  filter(Gender == "Male") %>%
+  ggplot(aes(x=TotalWorkingYears)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red')+
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Years",y="Density", title="Total Years Works for Males") + 
+  annotate("text", label = "Mean = 36.5", x=25, y=.04, color = "black")
+
+#all department breakdown
+plot_grid(AgeMaleDist, AgeFemaleDist, nrow=2)
+plot_grid(AgeMaleTWY, AgeFemaleTWY, nrow=2)
+
+
+```
+Code Chunk 4b: Gender attrition break down with age distribution, further supporting analysis for ages impacting attrition.
+
+```{r}
+#attrition by ages and female                                           
+
+AgeFemAtr1 <- C2Data %>% # Average Female Age who Quit = 33.83
+  select(Gender, Age, Attrition) %>%
+  filter (Gender == "Female", Attrition == "Yes")
+
+mean(AgeFemAtr1$Age)
+
+AgeFemNAtr1 <- C2Data %>% # Average Female Age who Did not Quit = 37.91
+  select(Gender, Age, Attrition) %>%
+  filter (Gender == "Female", Attrition == "No")
+
+mean(AgeFemNAtr1$Age)
+
+AgeFemAtr <- C2Data %>%
+  select(Gender, Age, Attrition) %>% 
+  filter(Gender == "Female", Attrition =="Yes") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='pink') +
+  geom_vline(aes(xintercept=mean(Age)), color='red') +
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Ages for Females Who Quit") +
+  annotate("text", label = "Mean = 33.83", x=50, y=.04, color = "black")
+
+AgeFemNAtr <- C2Data %>%
+  select(Gender, Age, Attrition) %>% 
+  filter(Gender == "Female", Attrition =="No") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='pink') +
+  geom_vline(aes(xintercept=mean(Age)), color='red') +
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Ages for Females Who Did Not Quit") +
+  annotate("text", label = "Mean = 37.91", x=50, y=.04, color = "black")
+
+#Comparing Female Attrition by Age
+plot_grid(AgeFemAtr, AgeFemNAtr, nrow = 2)
+
+#Comparing Males and Age Distribution
+
+AgeMalAtr1 <- C2Data %>% # Average Male Age who Quit = 33.76
+  select(Gender, Age, Attrition) %>%
+  filter (Gender == "Male", Attrition == "Yes")
+
+mean(AgeMalAtr1$Age)
+
+AgeMalNAtr1 <- C2Data %>% # Average Male Age who Did not Quit = 37.06
+  select(Gender, Age, Attrition) %>%
+  filter (Gender == "Male", Attrition == "No") 
+  
+mean(AgeMalNAtr1$Age)
+
+AgeMalAtr <- C2Data %>%
+  select(Gender, Age, Attrition) %>% 
+  filter(Gender == "Male", Attrition =="Yes") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red') +
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Ages for Males Who Quit") +
+  annotate("text", label = "Mean = 33.76", x=50, y=.04, color = "black")
+
+AgeMalNAtr <- C2Data %>%
+  select(Gender, Age, Attrition) %>% 
+  filter(Gender == "Male", Attrition =="No") %>%
+  ggplot(aes(x=Age)) + 
+  geom_density(alpha = .5, fill='Light Blue') +
+  geom_vline(aes(xintercept=mean(Age)), color='red') +
+  geom_hline(aes(yintercept=0)) +
+  labs(x="Ages",y="Density", title="Agesfor Males Who Did Not Quit") +
+  annotate("text", label = "Mean = 37.06", x=50, y=.04, color = "black")
+
+plot_grid(AgeMalAtr, AgeFemAtr, AgeMalNAtr, AgeFemNAtr, nrow = 2)
+
+
+```
+
+Code Chunk 5: Income Analysis by Gender, department and Jobsatisfaction 
+
+```{r}
+AveMalIncAtr <- C2Data %>% # Average income for Males who did not Quit is 6514.94                 
+  select(Gender, Attrition, MonthlyIncome) %>%
+  filter (Gender == "Male", Attrition == "No")
+
+mean(AveMalIncAtr$MonthlyIncome)
+ 
+AveMalIncNAtr <- C2Data %>% # Average income for Males who Quit is 4530.39                    
+  select(Gender, Attrition, MonthlyIncome) %>%
+  filter (Gender == "Male", Attrition == "Yes") 
+
+mean(AveMalIncNAtr$MonthlyIncome)
+  
+AveFemIncAtr <- C2Data %>% # Average income for females who did not Quit is 6968.61           
+  select(Gender, Attrition, MonthlyIncome) %>%
+  filter (Gender == "Female", Attrition == "No") 
+
+mean(AveFemIncAtr$MonthlyIncome)
+
+AveFemIncNAtr <- C2Data %>% # Average income for Females who Quit is 5149.55                  
+  select(Gender, Attrition, MonthlyIncome) %>%
+  filter (Gender == "Female", Attrition == "Yes")
+
+mean(AveFemIncNAtr$MonthlyIncome)
+
+#box plot for income and Gender, to search for gender discrimination
+IncGenBox <- C2Data %>%
+  select(Gender, Attrition, Department, JobSatisfaction, MonthlyIncome) %>%
+  ggplot(aes(x=Gender, y=MonthlyIncome, fill=Gender)) +
+  geom_boxplot(color="Black") +
+  labs(x="Gender",y="Monthly Income", title="Monthly Income By Gender")
+
+#Income Department and Attrition                                                 !!!!!!!!
+
+IncDeptAtr <- C2Data %>% select(Department, MonthlyIncome, Attrition) %>% group_by(Attrition, Department) %>%
+  summarise(IncDeptAtr=mean(MonthlyIncome)) %>%
+  ggplot(aes(x=reorder(Department, IncDeptAtr), y=IncDeptAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) +
+  labs(y="Average Income", x="Average Monthly Income", title="Average Income by Department and Attrition Status") 
+ 
+#Income Based on Job Satisfaction, not that big of an impact across satisfaction. Suggests pay is more important !!!!!!!!!!!!!!!
+
+IncJobSatAtr <- C2Data %>% select(JobSatisfaction, MonthlyIncome, Attrition) %>% group_by(Attrition, JobSatisfaction) %>%
+  summarise(IncJobSatAtr=mean(MonthlyIncome)) %>%
+  ggplot(aes(x=JobSatisfaction, y=IncJobSatAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Average Income", x="Job Satisfaction Score", title="Average Income by Job Satisfaction Level and Attrition Status") 
+
+
+#OT per department by attrition                                             !!!!!!!!
+
+oTDeptAtr <- C2Data %>% 
+  select(Department, Attrition, OverTime) %>% 
+  ggplot(aes(x=Department, y=OverTime, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) +
+  labs(y="Average Income", x="Average Monthly Income", title="Average Income by Department and Attrition Status")
+
+#OTByDepartment
+OTDeptAtr  <- C2Data %>%
+  select(Department, Attrition, OverTime) %>% 
+  ggplot(aes(x=Department, fill=OverTime)) +
+  geom_bar(stat="count") +
+  geom_text(aes(label = ..count..), stat = "count",position = "stack",vjust= 1, size=3) +
+  labs(x="Departments",y="Employee Count", title="OT by Department")
+
+IncGenBox
+IncDeptAtr
+IncJobSatAtr
+OTDeptAtr
+  
+```
+Code Chunk 6: There are other factors that impact income that we want to further explore. These include job level, years at the company, years since last promotion, OT. There was a linear relationship between Monthly Income JobLevel, years at the company and years since last promotion. OT there was no linear trend and suggests this may have an impact on attrition. We think OT does play a factor as it can be a signifcant contributor to MonthlyIncome. MonthlyIncome has shown to be an important factors in determining if someone quits or not. We did not use all the charts due to time. Only selected the most meaningful.
+
+```{r}
+#Job Level, no significant difference, no need to jump into job roles
+IncJobLevAtr <- C2Data %>% select(MonthlyIncome, JobLevel, Attrition) %>% group_by(Attrition, JobLevel) %>%
+  summarise(IncJobLevAtr =mean(MonthlyIncome)) %>%
+  ggplot(aes(x=JobLevel, y=IncJobLevAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Average Income", x="Job Level ", title="Avg Income by Attrition and JOb Level") 
+
+#Years at the company (YATC), similar to years since last promotion. Missing data, looks linear with missing datapoints
+IncYATCAtr <- C2Data %>% select(MonthlyIncome, YearsAtCompany, Attrition) %>% group_by(Attrition, YearsAtCompany) %>%
+  summarise(IncYATCAtr =mean(MonthlyIncome)) %>%
+  ggplot(aes(x=YearsAtCompany, y=IncYATCAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Average Income", x="Years at Company", title="Avg Income by Attrition and Years at the Company") 
+
+# Years since last promotion, Hard to say but would stat there is a linear relationship, but there are missing data points
+#Not as significant but may be impacted by low performance
+
+IncYSLPAtr <- C2Data %>% select(MonthlyIncome, YearsSinceLastPromotion, Attrition) %>% group_by(Attrition, YearsSinceLastPromotion) %>%
+  summarise(IncYSLPAtr =mean(MonthlyIncome)) %>%
+  ggplot(aes(x=YearsSinceLastPromotion, y=IncYSLPAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Average Income", x="Years Since Last Promotion", title="Avg Income by Attrition and Years Since Last Promoted") 
+
+# OT, employees who quit did not get as much OT as employees who stayed                          !!!!!!!!!!!!!!!!
+IncOTAtr <- C2Data %>% select(MonthlyIncome, OverTime, Attrition) %>% group_by(Attrition, OverTime) %>%
+  summarise(IncOTAtr =mean(MonthlyIncome)) %>%
+  ggplot(aes(x=OverTime, y=IncOTAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Average Income", x="OT", title="Avg Income by if an Employee Received OTs") 
+
+plot_grid(IncJobLevAtr, IncYATCAtr, IncYSLPAtr, IncOTAtr, nrow = 2)
+
+```
+Code Chunk 7: Job Satisfaction Analysis. This was brought about due to the high proportion of attrition in Sales Related jobs. Attrition in sales happens at the same frequency of RD but is half the size. We want to analyze if impacts are from outside or inside the company. Created and commented out the following variables: JobSatHRAtr, JobSatRDNATR, JobSatRDAtr, JobSatRDNAtr, JobSatSalesAtr, JobSatSalesNAtr, JobSatFemATR1, JobSatFemNATR1, JobSatMalART1, JobSatMalNART1. Issues with ggproto objects, only used these to get informatio, were not used to create charts.
+
+```{r}
+#Overall job satisfaction by Gender, it is about equal between males and females who quit and stayed. Larger Range for
+#males who quit but similar averages, doesnt appear to have a strong correlation
+
+#box plot for department and jobsatisfaction
+JobSatDept <- C2Data %>%
+  select(Gender, Attrition, Department, JobSatisfaction) %>%
+  filter(Gender == "Female") %>%
+  ggplot(aes(x=Department, y=JobSatisfaction, fill=Attrition)) +
+  geom_boxplot(color="Black")+
+  labs(x="Department",y="Job Satisfacation", title="Job Satisfaction by Department")
+
+JobSatHRAtr <- C2Data %>% # Average Job Satisfaction for HR who Quit is 2
+  select(Department, Gender, Attrition, JobSatisfaction) %>%
+  filter (Department == "Human Resources", Attrition == "Yes") %>%
+  summarise(JobSatHRAtr=(mean(JobSatisfaction)))
+
+JobSatRDNATR <- C2Data %>% # Average Job Satisfaction for HR who did not Quit is 2.69
+  select(Department, Gender, Attrition, JobSatisfaction) %>%
+  filter (Department == "Human Resources", Attrition == "No") %>%
+  summarise(JobSatRDNATR=(mean(JobSatisfaction)))
+
+JobSatRDAtr <- C2Data %>% # Average Job Satisfaction for RD who Quit is 2.43, Largest Range for attrition of departments
+  select(Department, Gender, Attrition, JobSatisfaction) %>%
+  filter (Department == "Research & Development", Attrition == "Yes") %>%
+  summarise(JobSatRDAtr=(mean(JobSatisfaction)))
+
+JobSatRDNAtr <- C2Data %>% # Average Job Satisfaction for RD who did not Quit is 2.76
+ select(Department, Gender, Attrition, JobSatisfaction) %>%
+  filter (Department == "Research & Development", Attrition == "No") %>%
+  summarise(JobSatRDNAtr=(mean(JobSatisfaction)))
+
+JobSatSalesAtr <- C2Data %>% # Average Job Satisfaction for Sales who Quit is 2.49
+  select(Department, Gender, Attrition, JobSatisfaction) %>%
+  filter (Department == "Sales", Attrition == "Yes") %>%
+  summarise(JobSatSalesAtr=(mean(JobSatisfaction)))
+
+JobSatSalesNAtr <- C2Data %>% # Average Job Satisfaction for Sales who did not Quit is 2.77
+  select(Department, Gender, Attrition, JobSatisfaction) %>%
+  filter (Department == "Sales", Attrition == "No") %>%
+  summarise(JobSatSalesNAtr=(mean(JobSatisfaction)))
+
+#Box plot for gender and jobsatisfaction, No strong correlation
+
+#Job Sat by Gender barchart
+JobSatGen <- C2Data %>%
+  select(Gender, Attrition, JobSatisfaction) %>%
+  ggplot(aes(x=Gender, y=JobSatisfaction, fill=Attrition)) +
+  geom_boxplot(color="Black") +
+  labs(x="Gender",y="Job Satisfaction", title="Job Satisfaction by Gender")
+
+JobSatFemATR1 <- C2Data %>% # Average Job Satisfaction for Females who Quit is 2.41
+  select(Gender, Attrition, JobSatisfaction) %>%
+  filter (Gender == "Female", Attrition == "Yes") %>%
+  summarise(JobSatFemATR1=mean(JobSatisfaction))
+  
+JobSatFemNATR1 <- C2Data %>% # Average Job Satisfaction for Females who did not Quit is 2.73
+  select(Gender, Attrition, JobSatisfaction) %>%
+  filter (Gender == "Female", Attrition == "No") %>%
+  summarise(JobSatFemNATR1=mean(JobSatisfaction))
+  
+JobSatMalART1 <- C2Data %>% # Average Job Satisfaction for Males who Quit is 2.45
+  select(Gender, Attrition, JobSatisfaction) %>%
+  filter (Gender == "Male", Attrition == "Yes") %>%
+  summarise(JobSaMalATR1=mean(JobSatisfaction))
+  
+JobSatMalNART1 <- C2Data %>% # Average Job Satisfaction for Males who did not Quit is 2.785
+  select(Gender, Attrition, JobSatisfaction) %>%
+  filter (Gender == "Male", Attrition == "No") %>%
+  summarise(JobSaMalATR1=mean(JobSatisfaction))
+
+JobSatTYCMal <- C2Data %>%
+  select(Gender, JobSatisfaction, TotalWorkingYears) %>% 
+  filter(Gender == "Male") %>%
+  ggplot(aes(x=TotalWorkingYears)) + 
+  geom_bar(alpha = .5, fill='Light Blue') +
+  labs(x="Ages",y="Density", title="Ages for Males Who Quit") +
+  annotate("text", label = "Mean = 33.76", x=50, y=.04, color = "black")
+
+#Job Sat by Total Working Years
+JobSatTWY <- C2Data %>% 
+  select(Gender, JobSatisfaction, TotalWorkingYears, Attrition) %>%
+  filter(Attrition =="Yes") %>%
+  ggplot(aes(x=TotalWorkingYears, fill="Yes")) +
+  geom_bar(stat="count") +
+  facet_wrap(~JobSatisfaction) + 
+  labs(y="Frequency", x="Total Working Years", title="Job Sat for Total Working Years (Male and Female)")
+
+  JobSatDept
+  JobSatGen
+  JobSatTWY
+```
+
+
+
+Code Chunk 8:  Environmental Satisfaction. We did not find any trends but found an interesting data point. We found managers who quit rated their environmental satisfaction under 2. This is the only job role that rates it below 2, this could in turn effect other variables or other job roles satisfaction in relationships, environment or the job itself.  Managers play a critical role in maintaining a healthy environment, if they are not happy the chances of them effecting others would be high enough to be concerning. We also checked worklife balance and environmental satisfaction in relation to relationship satisfaction. We did not find anything of concern.
+
+```{r}
+###############
+#Environment Satisfaction, last check to evaluate is the environment is causing undo stress on tne employees
+###############
+
+#looking at attrition based on environment satisfaction, break down by work life balance, distance from work, relationshipsatisfaction
+
+# Environment Satisfaction by department, No visual difference except in sales, most likely due to stress/nature of the job willl break down by Job Roles
+ESDeptAtr <- C2Data %>% select(Department,EnvironmentSatisfaction, Attrition) %>% group_by(Attrition, Department) %>%
+  summarise(ESDeptAtr =mean(EnvironmentSatisfaction)) %>%
+  ggplot(aes(x=Department, y=ESDeptAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Environmental Satisfaction", x="Department", title="Environmental Satisfaction by Department and Attrition") 
+
+#!!!!!!!! Environment Satisfaction by job role, Managers and Research directors had that largest difference in Environmental Satisfaction !!!!!!!!!!!!!!!!!!!!
+ESJobRAtr <- C2Data %>% select(JobRole,EnvironmentSatisfaction, Attrition) %>% group_by(Attrition, JobRole) %>%
+  summarise(ESJobRAtr  =mean(EnvironmentSatisfaction)) %>%
+  ggplot(aes(x=JobRole, y=ESJobRAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Environmental Satisfaction", x="Job Roles", title="Environmental Satisfaction by Job Roles and Attrition") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+# Environment Satisfaction by workllife balance, no major significant. Overall rating is below 3.
+ESWLBAtr <- C2Data %>% select(WorkLifeBalance,EnvironmentSatisfaction, Attrition) %>% group_by(Attrition, WorkLifeBalance) %>%
+  summarise(ESWLBAtr =mean(EnvironmentSatisfaction)) %>%
+  ggplot(aes(x=WorkLifeBalance, y=ESWLBAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Environmental Satisfaction", x="Work Life Blance", title="Environmental Satisfaction by Worklife Balance and Attrition") 
+
+
+# Environment Satisfaction by relationship satisfaction. Relatively insignificant difference between Ones who quit and did not. Who quit 
+# were expected to have sifgnicantly lower environmental satisfaction, they did not. They were realatively even.
+ESRSAtr <- C2Data %>% select(RelationshipSatisfaction, EnvironmentSatisfaction, Attrition) %>% group_by(Attrition,RelationshipSatisfaction) %>%
+  summarise(ESRSAtr =mean(EnvironmentSatisfaction)) %>%
+  ggplot(aes(x=RelationshipSatisfaction, y=ESRSAtr, fill=Attrition)) +
+  geom_bar(stat="identity", position="dodge") + facet_wrap(~Attrition) + 
+  labs(y="Environmental Satisfaction", x="RelationshipSatisfaction", title="Environmental Satisfaction by Relationship Satisfaction and Attrition") 
+
+#plot_grid(ESDeptAtr, ESJobRAtr, ESWLBAtr, ESRSAtr, nrow=2)
+
+ESDeptAtr
+ESJobRAtr
+ESWLBAtr
+ESRSAtr
+
+
+```
+Code Chunk 8a: xpanded Environmental check into Jobroles
+```{r}
+ArtJobRole<- C2Data %>%
+  select(JobRole, Attrition) %>%
+  ggplot(aes(x=JobRole, fill=Attrition))+
+  geom_bar(position="dodge",stat="count") +
+  labs(x="Job Roles",y="Employee Count", title="Attrition by Job Title")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+plot_grid(ESJobRAtr, ArtJobRole, nrow=1)
+
+```
+
+Code Chunk 9: Correlation matrix. We created a correlation matrix to verify which variables are correlated and would help build a useful model. We were able to identify Age, TotalWorkingYears, JobLevel as the top 3 variables that would best predict/estimate salary for an associate. 
+
+```{r}
+#From our initial analysis we have selected Age, Income (Overall), OT (As a contributor to Income difference). We will create a correlation matrix to verify relationships
+#Not as significant points of interest. We have observed differences in manager satisfaction with their job/environment. This job role has had several 
+
+#Correlation plot with corrplot to refine our our EDA
+
+
+#convert CHARs to INT
+
+C2Drops <- c("EmployeeCount","StandardHours", "Over18")
+C2Data1 <- C2Data[,!(names(C2Data) %in% C2Drops)]
+
+C2Data1$Attrition = as.numeric(C2Data1$Attrition)
+C2Data1$BusinessTravel = as.numeric(C2Data1$BusinessTravel)
+C2Data1$Department = as.numeric(C2Data1$Department)
+C2Data1$EducationField = as.numeric(C2Data1$EducationField)
+C2Data1$Gender = as.numeric(C2Data1$Gender)
+C2Data1$JobRole = as.numeric(C2Data1$JobRole)
+C2Data1$MaritalStatus = as.numeric(C2Data1$MaritalStatus)
+C2Data1$OverTime = as.numeric(C2Data1$OverTime)
+
+
+corrC2Data = rcorr(as.matrix(C2Data1))
+
+corrc2Data1 = cor(C2Data1, method = "pearson")
+corrc2Data1
+
+corrplotC2Data <- cor(C2Data1)
+corrplot(corrplotC2Data, method="square", type="upper", sig.level=.01)
+
+```
+
+Code Chunk 10:
+Classification and Predictive Models. KNN was used to classify observations as an attrition case or not. Our model uses 75/25 split for the provided dataset and was able to estimate if an employee quit or not based on Age and Monthly income. This KNN model was able to correctly identify an observation as an attrition case at 84.86% accuracy. We built a linear regression model to make predictions for Monthly Income based on Age, TotalWorkingYears, JobLevel. We were able to acheive an MSRE of 1387.199.
+
+```{r}
+####################
+#Buidding Predictive Models
+####################
+#LRM for salary, we used Age Job Level and Attrition to predict salaries. 
+set.seed(14)
+C2DataTrainObs = sample(seq(1,dim(C2Data1)[1]), round(.75*dim(C2Data1)[1]), replace=FALSE)
+C2DataTrain = C2Data1[C2DataTrainObs,]
+dim(C2DataTrain)
+C2DataTest = C2Data1[-C2DataTrainObs,]
+dim(C2DataTest)
+C2DataModel2 = lm(MonthlyIncome ~ Age + JobLevel + TotalWorkingYears, data=C2Data1)
+summary(C2DataModel2)
+
+RSS <- c(crossprod(C2DataModel2$residuals))
+
+MSE <- RSS/length(C2DataModel2$residuals)
+MSE 
+RSME <- sqrt(MSE)
+RSME #1387.199 
+
+#########################
+#KNN
+#########################
+
+set.seed(14)
+
+#1 is no attrition, 2 is yes attrition
+
+C2DataKNNTrainObs = sample(seq(1,dim(C2Data1)[1]), round(.75*dim(C2Data1)[1]), replace=FALSE)
+C2DataKNNTrain = C2Data1[C2DataKNNTrainObs,]
+C2DataKNNTrain1 = C2DataKNNTrain[c(2,3,19)]
+C2DataKNNTest = C2Data1[-C2DataKNNTrainObs,]
+C2DataKNNTest1 = C2DataKNNTest[c(2,3,19)]
+dim(C2DataKNNTest1)
+
+classifications = knn(C2DataKNNTrain1[,c(1,3)],C2DataKNNTest1[,c(1,3)],C2DataKNNTrain1$Attrition, prob = TRUE, k = 30)
+table(classifications,C2DataKNNTest1$Attrition)
+confusionMatrix(table(classifications,C2DataKNNTest1$Attrition))
+
+classifications
+
+```
