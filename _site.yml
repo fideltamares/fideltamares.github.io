@@ -11,7 +11,13 @@ navbar:
       href: about.html
     - text: "BeerEDA"
       icon: fa-file-pdf-o
-      href: FidelTamaresCase1RMD.html
+      href: fidel-Tamares-Case-1-RMD.
+    - text: "Attrition EDA Knit File"
+      icon: fa-rss
+      href: FidelTamaresCaseStudy2Rmarkdown.html
+    - text: "Attrition EDA Video"
+      icon: fa-rss
+      href: https://www.youtube.com/watch?v=uXAGDhGvZ7A 
     - text: "Fifa Height Analysis"
       icon: fa-rss
       href: FifaHeightByName.JPG
