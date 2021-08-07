@@ -11,7 +11,7 @@ navbar:
       href: about.html
     - text: "BeerEDA"
       icon: fa-file-pdf-o
-      href: fidel-Tamares-Case-1-RMD.
+      href: fidel-Tamares-Case-1-RMD
     - text: "Attrition EDA Knit File"
       icon: fa-rss
       href: FidelTamaresCaseStudy2Rmarkdown.html
